@@ -362,15 +362,27 @@ class Client
         ]);
     }
 
-    public function editor($template)
+    /**
+     * Creates editor url
+     * @param integer $template
+     * @param array|\stdClass|string $data
+     * @return string
+     */
+    public function editor($template, $data = null)
     {
         $resource = 'templates/'.$template.'/editor';
-        $query = http_build_query(array_merge(array(
+        $params = [
             'token' => $this->token,
             'workspace' => $this->workspace,
             'signature' => $this->createSignature($resource)
-        ), $params));
+        ];
 
-        return preg_replace('/([a-zA-Z])[\/]+/', '$1/', implode('/', array($this->baseUrl, $resource))).'?'.$query;
+        if ($data)
+        {
+            $data = self::data($data);
+            $params['data'] = is_array($data) ? \GuzzleHttp\json_encode($data) : $data;
+        }
+
+        return $this->baseUrl.$resource.'?'.http_build_query($params);
     }
 }
