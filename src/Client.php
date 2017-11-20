@@ -182,7 +182,15 @@ class Client
         $signature = $this->createSignature($resource);
         $method = strtoupper($method);
 
-        $options = [];
+        $options = [
+            'headers' => array_merge($headers, [
+                'X-Auth-Token' => $this->token,
+                'X-Auth-Workspace' => $this->workspace,
+                'X-Auth-Signature' => $signature,
+                'Content-Type' => 'application/json; charset=utf-8',
+                'Accept' => 'application/json'
+            ])
+        ];
 
         $params['data'] = isset($params['data']) ? self::data($params['data']) : null;
 
@@ -193,23 +201,8 @@ class Client
                 $options['body'] = \GuzzleHttp\json_encode($params['data']);
                 unset($params['data']);
             }
-
-            $options['query'] = $params;
-            $options['headers'] = array_merge($headers, [
-                'Token' => $this->token,
-                'Workspace' => $this->workspace,
-                'Signature' => $signature,
-                'Content-Type' => 'application/json; charset=utf-8'
-            ]);
         }
-        else if ($method === self::REQUEST_GET)
-        {
-            $options['query'] = array_merge($params, [
-                'token' => $this->token,
-                'workspace' => $this->workspace,
-                'signature' => $signature,
-            ]);
-        }
+        $options['query'] = $params;
         return $this->handleRequest($method, $resource, $options);
     }
 
