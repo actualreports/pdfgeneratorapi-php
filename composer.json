@@ -21,12 +21,12 @@
     },
     "autoload": {
         "psr-4": {
-            "PDFGeneratorAPI\\": "src/"
+            "ActualReports\\PDFGeneratorAPI\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "PDFGeneratorAPI\\Tests\\": "tests/"
+            "ActualReports\\PDFGeneratorAPI\\Tests\\": "tests/"
         }
     }
 }
