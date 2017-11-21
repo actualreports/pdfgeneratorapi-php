@@ -3,14 +3,14 @@
  * Created by tanel @14.11.17 11:23
  */
 
-namespace PDFGeneratorAPI\Tests;
+namespace ActualReports\PDFGeneratorAPI\Tests;
 
-use PDFGeneratorAPI\Exception;
+use ActualReports\PDFGeneratorAPI\Exception;
 
 class Client extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \PDFGeneratorAPI\Client
+     * @var \ActualReports\PDFGeneratorAPI\Client
      */
     protected $client;
     protected $token = '61e5f04ca1794253ed17e6bb986c1702';
@@ -23,7 +23,7 @@ class Client extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->client = new \PDFGeneratorAPI\Client($this->token, $this->secret, $this->workspace);
+        $this->client = new \ActualReports\PDFGeneratorAPI\Client($this->token, $this->secret, $this->workspace);
         $this->client->setBaseUrl($this->host.'/api/v3');
     }
 

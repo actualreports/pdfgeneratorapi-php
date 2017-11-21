@@ -3,7 +3,7 @@
  * Created by tanel @14.11.17 11:13
  */
 
-namespace PDFGeneratorAPI;
+namespace ActualReports\PDFGeneratorAPI;
 
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
