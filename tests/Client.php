@@ -29,8 +29,14 @@ class Client extends \PHPUnit_Framework_TestCase
 
     public function testGetTemplates()
     {
-        $result = $this->client->get();
-        $this->assertEquals(81, count($result->response));
+        $result = $this->client->getAll();
+        $this->assertEquals(81, count($result));
+    }
+
+    public function testGetTemplate()
+    {
+        $result = $this->client->get($this->templateId);
+        $this->assertEquals('QuickBooks Invoice Blue', $result->name);
     }
 
     public function testOutputDataArray()

@@ -116,7 +116,7 @@ class Client
      * @param string $resource
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     protected function createSignature($resource)
     {
@@ -175,7 +175,7 @@ class Client
      * @param array $headers
      *
      * @return \stdClass
-     * @throws \PDFGeneratorAPI\Exception
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function request($method = self::REQUEST_POST, $resource, array $params = [], array $headers = [])
     {
@@ -211,24 +211,28 @@ class Client
      * @param $resource
      * @param $options
      *
-     * @return \stdClass
+     * @return \stdClass|null
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     protected function handleRequest($method, $resource, $options)
     {
+        $response = null;
         try
         {
-            return $this->handleResponse($this->getHttpClient()->request($method, $resource, $options));
+            $response = $this->handleResponse($this->getHttpClient()->request($method, $resource, $options));
         }
         catch (RequestException $e)
         {
             $this->handleException($e);
         }
+
+        return $response;
     }
 
     /**
      * @param \GuzzleHttp\Exception\RequestException $e
      *
-     * @throws \PDFGeneratorAPI\Exception
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     protected function handleException(RequestException $e)
     {
@@ -261,7 +265,7 @@ class Client
      * @param \Psr\Http\Message\ResponseInterface $response
      *
      * @return \stdClass
-     * @throws \PDFGeneratorAPI\Exception
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     protected function handleResponse(ResponseInterface $response)
     {
@@ -277,19 +281,34 @@ class Client
     }
 
     /**
-     * Returns list templates available in active workspace and returns template info
+     * Returns list of templates available in active workspace
      *
      * @param array $access
      * @param array $tags
      *
-     * @return \stdClass
+     * @return array
      */
-    public function get(array $access = [], array $tags = [])
+    public function getAll(array $access = [], array $tags = [])
     {
-        return $this->request(self::REQUEST_GET, 'templates', [
+        $response = $this->request(self::REQUEST_GET, 'templates', [
             'access' => implode(',', $access),
             'tags' => implode(',', $tags)
         ]);
+
+        return $response->response;
+    }
+
+    /**
+     * Returns template configuration
+     *
+     * @param integer $template
+     *
+     * @return \stdClass
+     */
+    public function get($template)
+    {
+        $response = $this->request(self::REQUEST_GET, 'templates/'.$template);
+        return $response->response;
     }
 
     /**
@@ -300,7 +319,7 @@ class Client
      */
     public function create($name)
     {
-        return $this->request(self::REQUEST_POST, 'templates', [
+        $response = $this->request(self::REQUEST_POST, 'templates', [
             'data' =>[
                 'name' => $name,
                 'layout' => [
@@ -322,6 +341,8 @@ class Client
                 ]]
             ]
         ]);
+
+        return $response->response;
     }
 
     /**
@@ -333,9 +354,11 @@ class Client
      */
     public function copy($template, $newName = null)
     {
-        return $this->request(self::REQUEST_POST, 'templates/'.$template.'/copy', [
+        $response = $this->request(self::REQUEST_POST, 'templates/'.$template.'/copy', [
             'name' => $newName
         ]);
+
+        return $response->response;
     }
 
     /**
@@ -344,31 +367,35 @@ class Client
      * @param integer $template
      * @param string|array|\stdClass $data
      * @param string $format
+     * @param string $name
+     * @param array $params
      *
      * @return \stdClass
      */
-    public function output($template, $data, $format = self::FORMAT_PDF)
+    public function output($template, $data, $format = self::FORMAT_PDF, $name = null, array $params = [])
     {
-        return $this->request(self::REQUEST_POST, 'templates/'.$template.'/output', [
+        return $this->request(self::REQUEST_POST, 'templates/'.$template.'/output', array_merge([
             'data' => $data,
             'format' => $format,
-        ]);
+            'name' => $name
+        ], $params));
     }
 
     /**
      * Creates editor url
      * @param integer $template
      * @param array|\stdClass|string $data
+     * @param array $params
      * @return string
      */
-    public function editor($template, $data = null)
+    public function editor($template, $data = null, array $params = [])
     {
         $resource = 'templates/'.$template.'/editor';
-        $params = [
+        $params = array_merge([
             'token' => $this->token,
             'workspace' => $this->workspace,
             'signature' => $this->createSignature($resource)
-        ];
+        ], $params);
 
         if ($data)
         {
