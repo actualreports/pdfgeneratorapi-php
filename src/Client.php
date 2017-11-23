@@ -87,26 +87,24 @@ class Client
     }
 
     /**
-     * @param array|string $data
+     * Turns data into string,
      *
-     * @return array|mixed
+     * @param array|string|\stdClass $data
+     *
+     * @return string
      */
     protected static function data($data)
     {
-        if (is_string($data))
+        if (!is_string($data))
         {
             try
             {
-                $data = \GuzzleHttp\json_decode($data);
+                $data = \GuzzleHttp\json_encode($data);
             }
             catch (\InvalidArgumentException $e)
             {
 
             }
-        }
-        else
-        {
-            $data = (array) $data;
         }
 
         return $data;
@@ -192,16 +190,17 @@ class Client
             ])
         ];
 
-        $params['data'] = isset($params['data']) ? self::data($params['data']) : null;
-
-        if ($method === self::REQUEST_POST)
+        if ($params['data'])
         {
-            if ($params['data'] && is_array($params['data']))
-            {
-                $options['body'] = \GuzzleHttp\json_encode($params['data']);
-                unset($params['data']);
-            }
+            $params['data'] = self::data($params['data']);
         }
+
+        if ($method === self::REQUEST_POST && $params['data'])
+        {
+            $options['body'] = $params['data'];
+            unset($params['data']);
+        }
+
         $options['query'] = $params;
         return $this->handleRequest($method, $resource, $options);
     }
@@ -399,8 +398,7 @@ class Client
 
         if ($data)
         {
-            $data = self::data($data);
-            $params['data'] = is_array($data) ? \GuzzleHttp\json_encode($data) : $data;
+            $params['data'] = self::data($data);
         }
 
         return $this->baseUrl.$resource.'?'.http_build_query($params);

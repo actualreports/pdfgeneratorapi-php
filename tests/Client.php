@@ -59,6 +59,12 @@ class Client extends \PHPUnit_Framework_TestCase
         $this->assertEquals('application/pdf', $result->meta->{'content-type'});
     }
 
+    public function testOutputDataString()
+    {
+        $result = $this->client->output($this->templateId, \GuzzleHttp\json_encode(['DocNumber' => 1123123123]));
+        $this->assertEquals('application/pdf', $result->meta->{'content-type'});
+    }
+
     public function testEditorDataUrl()
     {
         $url = $this->client->editor($this->templateId, $this->host.'/assets/web/data/qbo_invoice.json');
