@@ -22,7 +22,7 @@ class Client
     /**
      * @var string
      */
-    private $token;
+    private $key;
     /**
      * @var string
      */
@@ -51,13 +51,13 @@ class Client
     /**
      * Client constructor.
      *
-     * @param $token
-     * @param $secret
+     * @param string $key
+     * @param string $secret
      * @param string $workspace
      */
-    public function __construct($token, $secret, $workspace = null)
+    public function __construct($key, $secret, $workspace = null)
     {
-        $this->token = $token;
+        $this->key = $key;
         $this->secret = $secret;
         $this->workspace = $workspace;
     }
@@ -118,9 +118,9 @@ class Client
      */
     protected function createSignature($resource)
     {
-        if (!$this->token)
+        if (!$this->key)
         {
-            throw new Exception('Missing api token');
+            throw new Exception('Missing api key');
         }
         if (!$this->secret)
         {
@@ -131,9 +131,15 @@ class Client
             throw new Exception('Missing workspace id');
         }
 
-        $data = $this->token.$this->workspace.$resource;
+        $data = [
+          'key' => $this->key,
+          'workspace' => $this->workspace,
+          'resource' => $resource
+        ];
 
-        return hash_hmac('sha256', $data, $this->secret);
+        ksort($data);
+
+        return hash_hmac('sha256', implode('', $data), $this->secret);
     }
 
     /**
@@ -152,21 +158,6 @@ class Client
     }
 
     /**
-     * @param string $resource
-     *
-     * @return array
-     */
-    protected function getRequestHeaders($resource)
-    {
-        return [
-            'Token' => $this->token,
-            'Workspace' => $this->workspace,
-            'Signature' => $this->createSignature($resource),
-            'Content-Type' => 'application/json'
-        ];
-    }
-
-    /**
      * @param string $method
      * @param string $resource
      * @param array $params
@@ -182,7 +173,7 @@ class Client
 
         $options = [
             'headers' => array_merge($headers, [
-                'X-Auth-Token' => $this->token,
+                'X-Auth-Key' => $this->key,
                 'X-Auth-Workspace' => $this->workspace,
                 'X-Auth-Signature' => $signature,
                 'Content-Type' => 'application/json; charset=utf-8',
@@ -391,7 +382,7 @@ class Client
     {
         $resource = 'templates/'.$template.'/editor';
         $params = array_merge([
-            'token' => $this->token,
+            'key' => $this->key,
             'workspace' => $this->workspace,
             'signature' => $this->createSignature($resource)
         ], $params);
