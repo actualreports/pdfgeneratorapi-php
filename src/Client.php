@@ -181,15 +181,15 @@ class Client
             ])
         ];
 
-        if ($params['data'])
+        if (isset($params['data']))
         {
             $params['data'] = self::data($params['data']);
-        }
 
-        if ($method === self::REQUEST_POST && $params['data'])
-        {
-            $options['body'] = $params['data'];
-            unset($params['data']);
+            if ($method === self::REQUEST_POST && $params['data'])
+            {
+                $options['body'] = $params['data'];
+                unset($params['data']);
+            }
         }
 
         $options['query'] = $params;
