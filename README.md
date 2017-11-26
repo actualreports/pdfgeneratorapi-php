@@ -9,7 +9,7 @@ composer require actualreports/pdfgeneratorapi-php
 
 ### Usage
 ```php
-$client = new \ActualReports\PDFGeneratorAPI\Client($token, $secret);
+$client = new \ActualReports\PDFGeneratorAPI\Client($key, $secret);
 $client->setWorkspace('unique@workspace.com');
 ```
 
