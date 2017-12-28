@@ -15,6 +15,7 @@ class Client
 
     const REQUEST_POST = 'POST';
     const REQUEST_GET = 'GET';
+    const REQUEST_DELETE = 'DELETE';
 
     const ACCESS_PRIVATE = 'private';
     const ACCESS_ORGANIZATION = 'organization';
@@ -54,12 +55,18 @@ class Client
      * @param string $key
      * @param string $secret
      * @param string $workspace
+     * @param integer $timeout
      */
-    public function __construct($key, $secret, $workspace = null)
+    public function __construct($key, $secret, $workspace = null, $timeout = null)
     {
         $this->key = $key;
         $this->secret = $secret;
         $this->workspace = $workspace;
+
+        if ($timeout)
+        {
+            $this->timeout = $timeout;
+        }
     }
 
     /**
@@ -73,6 +80,17 @@ class Client
     {
         $this->workspace = $workspace;
         return $this;
+    }
+
+    /**
+     * Set request timeout
+     *
+     * @param integer $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+        $this->httpClient = null;
     }
 
     /**
@@ -147,7 +165,8 @@ class Client
      */
     protected function getHttpClient()
     {
-        if (!$this->httpClient){
+        if (!$this->httpClient)
+        {
             $this->httpClient = new \GuzzleHttp\Client([
                 'base_uri' => $this->baseUrl,
                 'timeout' => $this->timeout
@@ -277,6 +296,7 @@ class Client
      * @param array $tags
      *
      * @return array
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function getAll(array $access = [], array $tags = [])
     {
@@ -294,6 +314,7 @@ class Client
      * @param integer $template
      *
      * @return \stdClass
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function get($template)
     {
@@ -306,6 +327,7 @@ class Client
      * @param string $name
      *
      * @return \stdClass
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function create($name)
     {
@@ -337,10 +359,12 @@ class Client
 
     /**
      * Creates copy of given template to active workspace
+     *
      * @param integer $template
      * @param string $newName
      *
      * @return \stdClass
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function copy($template, $newName = null)
     {
@@ -361,6 +385,7 @@ class Client
      * @param array $params
      *
      * @return \stdClass
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function output($template, $data, $format = self::FORMAT_PDF, $name = null, array $params = [])
     {
@@ -373,10 +398,13 @@ class Client
 
     /**
      * Creates editor url
+     * 
      * @param integer $template
      * @param array|\stdClass|string $data
      * @param array $params
+     *
      * @return string
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
      */
     public function editor($template, $data = null, array $params = [])
     {
@@ -393,5 +421,18 @@ class Client
         }
 
         return $this->baseUrl.$resource.'?'.http_build_query($params);
+    }
+
+    /**
+     * Delete template
+     *
+     * @param integer $template
+     *
+     * @return \stdClass
+     * @throws \ActualReports\PDFGeneratorAPI\Exception
+     */
+    public function delete($template)
+    {
+        return $this->request(self::REQUEST_DELETE, 'templates/'.$template);
     }
 }

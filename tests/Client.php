@@ -16,21 +16,22 @@ class Client extends \PHPUnit_Framework_TestCase
     protected $key = '61e5f04ca1794253ed17e6bb986c1702';
     protected $secret = '68db1902ad1bb26d34b3f597488b9b28';
     protected $workspace = 'demo.example@actualreports.com';
-    protected $host = 'http://127.0.0.3';// 'https://staging.pdfgeneratorapi.com';
+    protected $host = 'https://staging.pdfgeneratorapi.com';
     protected $templateId = 21650;
+    protected $timeout = 300;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->client = new \ActualReports\PDFGeneratorAPI\Client($this->key, $this->secret, $this->workspace);
+        $this->client = new \ActualReports\PDFGeneratorAPI\Client($this->key, $this->secret, $this->workspace, $this->timeout);
         $this->client->setBaseUrl($this->host.'/api/v3');
     }
 
     public function testGetTemplates()
     {
         $result = $this->client->getAll();
-        $this->assertEquals(81, count($result));
+        $this->assertEquals(83, count($result));
     }
 
     public function testGetTemplate()
@@ -63,20 +64,6 @@ class Client extends \PHPUnit_Framework_TestCase
     {
         $result = $this->client->output($this->templateId, \GuzzleHttp\json_encode(['DocNumber' => 1123123123]));
         $this->assertEquals('application/pdf', $result->meta->{'content-type'});
-    }
-
-    public function testEditorDataUrl()
-    {
-        $url = $this->client->editor($this->templateId, $this->host.'/assets/web/data/qbo_invoice.json');
-        $compareUrl = $this->host.'/api/v3/templates/21650/editor?key=61e5f04ca1794253ed17e6bb986c1702&workspace=demo.example%40actualreports.com&signature=1887f3df76acee7965758160f1baf39ce271e804cbf98f1677ae7a90716a31a8&data=http%3A%2F%2F127.0.0.3%2Fassets%2Fweb%2Fdata%2Fqbo_invoice.json';
-        $this->assertEquals($compareUrl, $url);
-    }
-
-    public function testEditorDataArray()
-    {
-        $url = $this->client->editor($this->templateId, ['DocNumber' => 1123123123]);
-        $compareUrl = $this->host.'/api/v3/templates/21650/editor?key=61e5f04ca1794253ed17e6bb986c1702&workspace=demo.example%40actualreports.com&signature=1887f3df76acee7965758160f1baf39ce271e804cbf98f1677ae7a90716a31a8&data=%7B%22DocNumber%22%3A1123123123%7D';
-        $this->assertEquals($compareUrl, $url);
     }
 
     public function testErrorResponse()
