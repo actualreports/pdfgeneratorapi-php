@@ -42,15 +42,14 @@ class Client extends \PHPUnit_Framework_TestCase
 
     public function testOutputDataArray()
     {
-        $result = $this->client->output($this->templateId, ['DocNumber' => 1123123123]);
+        $data = $this->getData();
+        $result = $this->client->output($this->templateId, (array) $data);
         $this->assertEquals('application/pdf', $result->meta->{'content-type'});
     }
 
     public function testOutputDataObject()
     {
-        $data = new \stdClass();
-        $data->DocNumber = 12818812;
-        $result = $this->client->output($this->templateId, $data);
+        $result = $this->client->output($this->templateId, $this->getData());
         $this->assertEquals('application/pdf', $result->meta->{'content-type'});
     }
 
@@ -70,5 +69,12 @@ class Client extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException(Exception::class);
         $this->client->output($this->templateId, [],'doc');
+    }
+
+    protected function getData()
+    {
+        $data = new \stdClass();
+        $data->DocNumber = 12818812;
+        return $data;
     }
 }

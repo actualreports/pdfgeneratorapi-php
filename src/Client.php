@@ -105,30 +105,6 @@ class Client
     }
 
     /**
-     * Turns data into string,
-     *
-     * @param array|string|\stdClass $data
-     *
-     * @return string
-     */
-    protected static function data($data)
-    {
-        if (!is_string($data))
-        {
-            try
-            {
-                $data = \GuzzleHttp\json_encode($data);
-            }
-            catch (\InvalidArgumentException $e)
-            {
-
-            }
-        }
-
-        return $data;
-    }
-
-    /**
      * @param string $resource
      *
      * @return string
@@ -200,18 +176,24 @@ class Client
             ])
         ];
 
-        if (isset($params['data']))
+        /**
+         * If POST and data is not an url then send data in body as json string
+         */
+        if ($method === self::REQUEST_POST && isset($params['data']) && !self::isUrl($params['data']))
         {
-            $params['data'] = self::data($params['data']);
-
-            if ($method === self::REQUEST_POST && $params['data'])
+            if (is_string($params['data']))
             {
-                $options['body'] = $params['data'];
+                $params['data'] = self::stringToArray($params['data']);
+            }
+
+            if ($params['data'])
+            {
+                $options[\GuzzleHttp\RequestOptions::JSON] = $params['data'];
                 unset($params['data']);
             }
         }
 
-        $options['query'] = $params;
+        $options[\GuzzleHttp\RequestOptions::QUERY] = $params;
         return $this->handleRequest($method, $resource, $options);
     }
 
@@ -417,7 +399,7 @@ class Client
 
         if ($data)
         {
-            $params['data'] = self::data($data);
+            $params['data'] = self::dataToString($data);
         }
 
         return $this->baseUrl.$resource.'?'.http_build_query($params);
@@ -434,5 +416,60 @@ class Client
     public function delete($template)
     {
         return $this->request(self::REQUEST_DELETE, 'templates/'.$template);
+    }
+
+    /**
+     * @param mixed $string
+     *
+     * @return boolean
+     */
+    protected static function isUrl($string)
+    {
+        return is_string($string) && filter_var($string, FILTER_VALIDATE_URL) ? true : false;
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return array|null
+     */
+    protected static function stringToArray($string)
+    {
+        $data = null;
+
+        try
+        {
+            $data = \GuzzleHttp\json_decode($string, true);
+        }
+        catch (\InvalidArgumentException $e)
+        {
+
+        }
+
+        return $data;
+    }
+
+    /**
+     * Turns data into string,
+     *
+     * @param array|string|\stdClass $data
+     *
+     * @return string
+     */
+    protected static function dataToString($data)
+    {
+        if (!is_string($data))
+        {
+            try
+            {
+                $data = \GuzzleHttp\json_encode($data);
+            }
+            catch (\InvalidArgumentException $e)
+            {
+
+            }
+        }
+
+        return $data;
     }
 }
