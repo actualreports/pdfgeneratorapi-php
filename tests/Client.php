@@ -6,8 +6,9 @@
 namespace ActualReports\PDFGeneratorAPI\Tests;
 
 use ActualReports\PDFGeneratorAPI\Exception;
+use PHPUnit\Framework\TestCase;
 
-class Client extends \PHPUnit_Framework_TestCase
+class Client extends TestCase
 {
     /**
      * @var \ActualReports\PDFGeneratorAPI\Client
@@ -17,7 +18,7 @@ class Client extends \PHPUnit_Framework_TestCase
     protected $secret = '68db1902ad1bb26d34b3f597488b9b28';
     protected $workspace = 'demo.example@actualreports.com';
     protected $host = 'https://staging.pdfgeneratorapi.com';
-    protected $templateId = 21650;
+    protected $templateId = 19375;
     protected $timeout = 300;
 
     public function setUp()
@@ -31,13 +32,13 @@ class Client extends \PHPUnit_Framework_TestCase
     public function testGetTemplates()
     {
         $result = $this->client->getAll();
-        $this->assertEquals(83, count($result));
+        $this->assertTrue(count($result) > 10);
     }
 
     public function testGetTemplate()
     {
         $result = $this->client->get($this->templateId);
-        $this->assertEquals('QuickBooks Invoice Blue', $result->name);
+        $this->assertEquals('Australian Tax Invoice', $result->name);
     }
 
     public function testOutputDataArray()
@@ -67,7 +68,7 @@ class Client extends \PHPUnit_Framework_TestCase
 
     public function testErrorResponse()
     {
-        $this->setExpectedException(Exception::class);
+        $this->expectException(Exception::class);
         $this->client->output($this->templateId, [],'doc');
     }
 

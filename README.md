@@ -10,6 +10,7 @@ composer require actualreports/pdfgeneratorapi-php
 ### Usage
 ```php
 $client = new \ActualReports\PDFGeneratorAPI\Client($key, $secret);
+$client->setBaseUrl('https://us1.pdfgeneratorapi.com/api/v3/');
 $client->setWorkspace('unique@workspace.com');
 ```
 

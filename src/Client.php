@@ -37,7 +37,7 @@ class Client
     /**
      * @var string
      */
-    protected $baseUrl = 'https://pdfgeneratorapi.com/api/v3/';
+    protected $baseUrl = 'https://us1.pdfgeneratorapi.com/api/v3/';
 
     /**
      * @var int
