@@ -50,18 +50,25 @@ class Client
     protected $httpClient;
 
     /**
+     * @var bool
+     */
+    protected $useTimestamp = false;
+
+    /**
      * Client constructor.
      *
      * @param string $key
      * @param string $secret
      * @param string $workspace
      * @param integer $timeout
+     * @param boolean $useTimestamp
      */
-    public function __construct($key, $secret, $workspace = null, $timeout = null)
+    public function __construct($key, $secret, $workspace = null, $timeout = null, $useTimestamp = false)
     {
         $this->key = $key;
         $this->secret = $secret;
         $this->workspace = $workspace;
+        $this->useTimestamp = $useTimestamp;
 
         if ($timeout)
         {
@@ -80,6 +87,14 @@ class Client
     {
         $this->workspace = $workspace;
         return $this;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setUseTimestamp($status = true)
+    {
+        $this->useTimestamp = $status;
     }
 
     /**
@@ -106,11 +121,12 @@ class Client
 
     /**
      * @param string $resource
+     * @param integer $timestamp
      *
      * @return string
      * @throws Exception
      */
-    protected function createSignature($resource)
+    protected function createSignature($resource, $timestamp)
     {
         if (!$this->key)
         {
@@ -130,6 +146,11 @@ class Client
           'workspace' => $this->workspace,
           'resource' => $resource
         ];
+
+        if ($this->useTimestamp)
+        {
+            $data['timestamp'] = $timestamp;
+        }
 
         ksort($data);
 
@@ -154,17 +175,24 @@ class Client
 
     /**
      * @param string $method
-     * @param string $resource
+     * @param $resource
      * @param array $params
      * @param array $headers
      *
-     * @return \stdClass
+     * @return null|\stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function request($method = self::REQUEST_POST, $resource, array $params = [], array $headers = [])
     {
-        $signature = $this->createSignature($resource);
+        $timestamp = time();
+        $signature = $this->createSignature($resource, $timestamp);
         $method = strtoupper($method);
+
+        if ($this->useTimestamp)
+        {
+            $headers['X-Auth-Timestamp'] = $timestamp;
+        }
 
         $options = [
             'headers' => array_merge($headers, [
@@ -202,8 +230,9 @@ class Client
      * @param $resource
      * @param $options
      *
-     * @return \stdClass|null
+     * @return null|\stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function handleRequest($method, $resource, $options)
     {
@@ -279,6 +308,7 @@ class Client
      *
      * @return array
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getAll(array $access = [], array $tags = [])
     {
@@ -297,6 +327,7 @@ class Client
      *
      * @return \stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get($template)
     {
@@ -310,6 +341,7 @@ class Client
      *
      * @return \stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function create($name)
     {
@@ -347,6 +379,7 @@ class Client
      *
      * @return \stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function copy($template, $newName = null)
     {
@@ -368,6 +401,7 @@ class Client
      *
      * @return \stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function output($template, $data, $format = self::FORMAT_PDF, $name = null, array $params = [])
     {
@@ -390,12 +424,18 @@ class Client
      */
     public function editor($template, $data = null, array $params = [])
     {
+        $timestamp = time();
         $resource = 'templates/'.$template.'/editor';
         $params = array_merge([
             'key' => $this->key,
             'workspace' => $this->workspace,
-            'signature' => $this->createSignature($resource)
+            'signature' => $this->createSignature($resource, $timestamp)
         ], $params);
+
+        if ($this->useTimestamp)
+        {
+            $params['timestamp'] = $timestamp;
+        }
 
         if ($data)
         {
@@ -412,6 +452,7 @@ class Client
      *
      * @return \stdClass
      * @throws \ActualReports\PDFGeneratorAPI\Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function delete($template)
     {

@@ -35,6 +35,22 @@ class Client extends TestCase
         $this->assertTrue(count($result) > 10);
     }
 
+    public function testGetTemplatesWithTimestamp()
+    {
+        $this->client->setUseTimestamp(true);
+        $result = $this->client->getAll();
+        $this->client->setUseTimestamp(false);
+        $this->assertTrue(count($result) > 10);
+    }
+
+    public function testGetTemplatesWithExpiredTimestamp()
+    {
+        $this->expectException(Exception::class);
+        $this->client->request('GET', 'templates', [
+          'timestamp' => time() - 3601
+        ]);
+    }
+
     public function testGetTemplate()
     {
         $result = $this->client->get($this->templateId);
