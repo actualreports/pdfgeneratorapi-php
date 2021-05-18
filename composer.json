@@ -15,12 +15,14 @@
     "scripts": {
         "test": "phpunit"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^7.3 || ^8.0",
         "guzzlehttp/guzzle": "^7.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4"
+        "phpunit/phpunit": "^6.4 || dev-master"
     },
     "autoload": {
         "psr-4": {
