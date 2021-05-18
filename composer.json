@@ -12,6 +12,9 @@
             "homepage": "https://github.com/tanelt"
         }
     ],
+    "scripts": {
+        "test": "phpunit"
+    },
     "require": {
         "php": "^7.3 || ^8.0",
         "guzzlehttp/guzzle": "^7.2"
