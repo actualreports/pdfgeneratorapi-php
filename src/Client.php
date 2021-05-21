@@ -175,7 +175,7 @@ class Client
 
     /**
      * @param string $method
-     * @param $resource
+     * @param string $resource
      * @param array $params
      * @param array $headers
      *
@@ -183,7 +183,7 @@ class Client
      * @throws \ActualReports\PDFGeneratorAPI\Exception
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function request($method = self::REQUEST_POST, $resource, array $params = [], array $headers = [])
+    public function request(string $method = self::REQUEST_POST, string $resource = '', array $params = [], array $headers = [])
     {
         $timestamp = time();
         $signature = $this->createSignature($resource, $timestamp);
